@@ -22,7 +22,32 @@ const RIPPLE_LIFE = 3.2; // s
 const RIPPLE_WIDTH = 54; // px, wavefront thickness
 const IDLE_RIPPLE_EVERY = 6.5; // s without interaction before an ambient pulse
 
-type Ripple = { x: number; y: number; t0: number; strength: number };
+type Ripple = {
+  x: number;
+  y: number;
+  t0: number;
+  strength: number;
+  /** Per-wave noise offset so no two waves deform alike. */
+  seed: number;
+  /** Elliptical skew: the wave spreads faster along one random axis. */
+  cos: number;
+  sin: number;
+  squash: number;
+};
+
+function makeRipple(x: number, y: number, t0: number, strength: number) {
+  const a = Math.random() * Math.PI;
+  return {
+    x,
+    y,
+    t0,
+    strength,
+    seed: Math.random() * 100,
+    cos: Math.cos(a),
+    sin: Math.sin(a),
+    squash: 0.62 + Math.random() * 0.28,
+  };
+}
 
 /* ---------- 2D simplex noise (Gustavson), seeded ---------- */
 
@@ -176,12 +201,14 @@ export function AsciiField() {
 
       // Ambient pulse so first-time visitors discover the interaction.
       if (!reduceMotion && sec - lastInteraction > nextIdle) {
-        ripples.push({
-          x: W * (0.15 + Math.random() * 0.7),
-          y: H * (0.15 + Math.random() * 0.7),
-          t0: sec,
-          strength: 0.55,
-        });
+        ripples.push(
+          makeRipple(
+            W * (0.15 + Math.random() * 0.7),
+            H * (0.15 + Math.random() * 0.7),
+            sec,
+            0.55,
+          ),
+        );
         lastInteraction = sec;
         nextIdle = IDLE_RIPPLE_EVERY + Math.random() * 4;
       }
@@ -242,17 +269,33 @@ export function AsciiField() {
           for (let k = 0; k < rCount; k++) {
             const rp = ripples[k];
             const age = sec - rp.t0;
-            const front = age * RIPPLE_SPEED;
-            const dx = x - rp.x;
-            const dy = y - rp.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const off = dist - front;
-            const life = 1 - age / RIPPLE_LIFE;
+            const p = age / RIPPLE_LIFE;
+            // Eases out: the wave bursts, then loses momentum.
+            const front = RIPPLE_SPEED * age * (1 - 0.3 * p);
+            // Distance measured in the wave's own skewed frame.
+            const dx0 = x - rp.x;
+            const dy0 = y - rp.y;
+            const dx = dx0 * rp.cos + dy0 * rp.sin;
+            const dy = (dy0 * rp.cos - dx0 * rp.sin) / rp.squash;
+            const dist = Math.sqrt(dx * dx + dy * dy) + 0.001;
+            // Deformation grows as it travels: round at birth, lobed later.
+            const amp = 0.12 + 0.4 * Math.min(1, age / 1.1);
+            if (dist > front * (1 + amp * 1.3) + RIPPLE_WIDTH * 2) continue;
+
+            // Radius depends on direction: sample noise around a circle
+            // (low lobes + finer ripple), drifting so the shape keeps morphing.
+            const ux = dx / dist;
+            const uy = dy / dist;
+            const lobes =
+              noise(ux * 1.3 + rp.seed, uy * 1.3 + age * 0.7) * 0.8 +
+              noise(ux * 3.4 - rp.seed, uy * 3.4 - age * 1.1) * 0.3;
+            const off = dist - front * (1 + amp * lobes);
+            const life = 1 - p;
             const fade = Math.pow(life, 1.4) * rp.strength;
             if (off > RIPPLE_WIDTH * 2) continue;
 
             // Ragged wavefront: the noise wobbles where the ring sits.
-            const wobble = noise(x * 0.03 + rp.t0, y * 0.03) * 18;
+            const wobble = noise(x * 0.03 + rp.t0, y * 0.03) * 22;
             const o = (off + wobble) / RIPPLE_WIDTH;
             const ring = Math.exp(-o * o) * (0.5 + 0.5 * grain);
             const tail =
@@ -303,7 +346,7 @@ export function AsciiField() {
     function onPointerDown(e: PointerEvent) {
       if (reduceMotion) return;
       const sec = performance.now() / 1000;
-      ripples.push({ x: e.clientX, y: e.clientY, t0: sec, strength: 1 });
+      ripples.push(makeRipple(e.clientX, e.clientY, sec, 1));
       if (ripples.length > 8) ripples.shift();
       lastInteraction = sec;
     }
