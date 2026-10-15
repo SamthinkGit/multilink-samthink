@@ -1,4 +1,4 @@
-import { Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 
 // Same face as materiacore.com.
@@ -14,13 +14,7 @@ const body = localFont({
 const label = JetBrains_Mono({
   variable: "--font-label",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500"],
+  weight: ["200", "400", "500"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist",
-  subsets: ["latin"],
-  weight: ["200", "300"],
-});
-
-export const fontVariables = `${body.variable} ${label.variable} ${geistMono.variable}`;
+export const fontVariables = `${body.variable} ${label.variable}`;

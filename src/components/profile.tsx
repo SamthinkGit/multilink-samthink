@@ -1,6 +1,6 @@
 import { AsciiField } from "@/components/ascii-field";
 import { ArrowIcon, GitHubIcon, LinkedInIcon } from "@/components/brand-icons";
-import { Wordmark, type WordmarkVariant } from "@/components/wordmark";
+import { Wordmark } from "@/components/wordmark";
 import { sections, socials, type Locale } from "@/lib/links";
 
 const socialIcons = { GitHub: GitHubIcon, LinkedIn: LinkedInIcon };
@@ -26,13 +26,7 @@ const copy = {
   en: { socials: "Social", language: "Language" },
 };
 
-export function Profile({
-  variant,
-  locale = "es",
-}: {
-  variant?: WordmarkVariant;
-  locale?: Locale;
-}) {
+export function Profile({ locale = "es" }: { locale?: Locale }) {
   return (
     <>
       <AsciiField />
@@ -74,7 +68,7 @@ export function Profile({
       <main className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-4 py-8 sm:py-16">
         <div className="flex w-full max-w-md flex-col">
           <header className="animate-rise-in flex flex-col items-center text-center">
-            <Wordmark variant={variant} />
+            <Wordmark />
             <p className="text-muted-foreground mt-5 font-mono text-[13px] tracking-[0.04em]">
               » AI + Software Engineer «
             </p>

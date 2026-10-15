@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description:
     "AI + Software Engineer. Projects and research: Moonlight, Nova, HyperFocus and AI agents.",
   alternates: { languages: { es: "/", en: "/en" } },
+  openGraph: {
+    title: "samthink",
+    description: "AI + Software Engineer. Projects and research: Moonlight, Nova, HyperFocus and AI agents.",
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {
