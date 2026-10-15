@@ -39,9 +39,23 @@ export const wordmarkVariants = [
 export type WordmarkVariant = (typeof wordmarkVariants)[number]["id"];
 
 const caret = <span className="text-accent animate-caret">_</span>;
-const size = "text-[clamp(2.4rem,11vw,3.25rem)] leading-none";
+// [regular, compact] sizes: lowercase marks, then the wide-tracked caps.
+const sizes = {
+  lower: ["text-[clamp(2.4rem,11vw,3.25rem)]", "text-[2.1rem]"],
+  alliance: ["text-[clamp(1.6rem,7.5vw,2.25rem)]", "text-[1.45rem]"],
+  mono: ["text-[clamp(1.7rem,8vw,2.4rem)]", "text-[1.5rem]"],
+} as const;
 
-export function Wordmark({ variant = 1 }: { variant?: WordmarkVariant }) {
+export function Wordmark({
+  variant = 1,
+  compact = false,
+}: {
+  variant?: WordmarkVariant;
+  /** Fixed, smaller size for the side-by-side chooser. */
+  compact?: boolean;
+}) {
+  const k = compact ? 1 : 0;
+  const size = `${sizes.lower[k]} leading-none`;
   switch (variant) {
     case 1:
       return (
@@ -52,7 +66,7 @@ export function Wordmark({ variant = 1 }: { variant?: WordmarkVariant }) {
     case 2:
       return (
         <h1
-          className={`${size} pl-[0.32em] font-sans text-[clamp(1.6rem,7.5vw,2.25rem)] font-normal tracking-[0.32em] uppercase`}
+          className={`${sizes.alliance[k]} pl-[0.32em] leading-none font-sans font-normal tracking-[0.32em] uppercase`}
         >
           Samthink
         </h1>
@@ -90,7 +104,7 @@ export function Wordmark({ variant = 1 }: { variant?: WordmarkVariant }) {
     case 6:
       return (
         <h1
-          className={`${size} pl-[0.22em] font-mono text-[clamp(1.7rem,8vw,2.4rem)] font-thin tracking-[0.22em] uppercase`}
+          className={`${sizes.mono[k]} pl-[0.22em] leading-none font-mono font-thin tracking-[0.22em] uppercase`}
         >
           Samthink
         </h1>

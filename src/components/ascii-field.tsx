@@ -278,24 +278,24 @@ export function AsciiField() {
             const dx = dx0 * rp.cos + dy0 * rp.sin;
             const dy = (dy0 * rp.cos - dx0 * rp.sin) / rp.squash;
             const dist = Math.sqrt(dx * dx + dy * dy) + 0.001;
-            // Deformation grows as it travels: round at birth, lobed later.
-            const amp = 0.12 + 0.4 * Math.min(1, age / 1.1);
+            // Deformation grows as it travels: round at birth, a soft blob later.
+            const amp = 0.06 + 0.26 * Math.min(1, age / 1.4);
             if (dist > front * (1 + amp * 1.3) + RIPPLE_WIDTH * 2) continue;
 
-            // Radius depends on direction: sample noise around a circle
-            // (low lobes + finer ripple), drifting so the shape keeps morphing.
+            // Radius depends on direction: one very low-frequency noise read
+            // around a small circle gives one or two broad, smooth bulges
+            // (higher frequencies turn it into a flower). It drifts slowly
+            // so the outline keeps breathing as it grows.
             const ux = dx / dist;
             const uy = dy / dist;
-            const lobes =
-              noise(ux * 1.3 + rp.seed, uy * 1.3 + age * 0.7) * 0.8 +
-              noise(ux * 3.4 - rp.seed, uy * 3.4 - age * 1.1) * 0.3;
-            const off = dist - front * (1 + amp * lobes);
+            const bulge = noise(ux * 0.55 + rp.seed, uy * 0.55 + age * 0.25);
+            const off = dist - front * (1 + amp * bulge);
             const life = 1 - p;
             const fade = Math.pow(life, 1.4) * rp.strength;
             if (off > RIPPLE_WIDTH * 2) continue;
 
-            // Ragged wavefront: the noise wobbles where the ring sits.
-            const wobble = noise(x * 0.03 + rp.t0, y * 0.03) * 22;
+            // Slight, broad wobble so the edge reads organic, not stamped.
+            const wobble = noise(x * 0.008 + rp.t0, y * 0.008) * 9;
             const o = (off + wobble) / RIPPLE_WIDTH;
             const ring = Math.exp(-o * o) * (0.5 + 0.5 * grain);
             const tail =
