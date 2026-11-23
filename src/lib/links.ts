@@ -36,6 +36,12 @@ const all: Project[] = [
     kind: "Desktop",
   },
   {
+    name: "Open Prototypes",
+    href: "https://openprototypes.materiacore.com/",
+    summary: { es: "Prototipos abiertos de Materiacore", en: "Open prototypes by Materiacore" },
+    kind: "Web",
+  },
+  {
     name: "B* Expansion",
     href: "https://onlinelibrary.wiley.com/doi/10.1111/exsy.70333",
     summary: { es: "Algoritmos de Optimización de agentes IA", en: "Optimization Algorithms for AI Agents" },
@@ -60,7 +66,7 @@ const byName = (name: string) => all.find((p) => p.name === name)!;
 export const sections: Section[] = [
   {
     title: { es: "Proyectos", en: "Projects" },
-    items: ["Moonlight", "Nova", "HyperFocus"].map(byName),
+    items: ["Moonlight", "Nova", "HyperFocus", "Open Prototypes"].map(byName),
   },
   {
     title: { es: "Research", en: "Research" },
